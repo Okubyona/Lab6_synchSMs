@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x26c: file source/main.c, line 115.
+Note: automatically using hardware breakpoints for read-only addresses.
+Type commands for breakpoint(s) 1, one per line.
+End with a line saying just "end".
+Continuing.
+
+Breakpoint 1, main () at source/main.c:116
+116	        Tick(state);
+PORTB addr0x800025:	0x01
+Continuing.
+
+Breakpoint 1, main () at source/main.c:116
+116	        Tick(state);
+PORTB addr0x800025:	0x01
+A debugging session is active.
+
+	Inferior 1 [Remote target] will be detached.
+
+Quit anyway? (y or n) Detaching from program: /home/csmajs/abazu001/Lab6_synchSMs/build/objects/main.elf, Remote target
+Quitting: Remote doesn't know how to detach

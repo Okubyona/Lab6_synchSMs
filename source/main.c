@@ -1,11 +1,11 @@
 /*	Author: Andrew Bazua
- *  Partner(s) Name: 
+ *  Partner(s) Name:
  *	Lab Section:
  *	Assignment: Lab #6  Exercise #1
- *	Exercise Description: [ Create a synchSM to blink three LEDs connected to 
-        PB0, PB1, and PB2 in sequence, 1 second each. Implement that synchSM 
-        in C using the method defined in class. In addition to demoing your 
-        program, you will need to show that your code adheres entirely to 
+ *	Exercise Description: [ Create a synchSM to blink three LEDs connected to
+        PB0, PB1, and PB2 in sequence, 1 second each. Implement that synchSM
+        in C using the method defined in class. In addition to demoing your
+        program, you will need to show that your code adheres entirely to
         the method with no variations. ]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -17,26 +17,27 @@
 #include "simAVRHeader.h"
 #endif
 
-typedef enum States {Start, init, nextLED, pause, wait, reset} States;
+typedef enum States {Start, init, nextLED} States;
 
 volatile unsigned char TimerFlag = 0; // TimerISR() sets this to 1. C programmer should clear to 0.
 
+// Internal variables for mapping AVR's ISR to our cleaner TimerISR model.
 unsigned long _avr_timer_M = 1; // Start count from here, down to 0. Default 1 ms.
 unsigned long _avr_timer_cntcurr = 0;   // Current internal count of 1 ms ticks.
 
 void TimerOn() {
     TCCR1B = 0x0B;
-    
+
     OCR1A = 125;
-    
+
     TIMSK1 = 0x02;
-    
+
     TCNT1=0;
-    
+
     _avr_timer_cntcurr = _avr_timer_M;
 
     SREG |= 0x80;
-    
+
 }
 
 void TimerOff() {
@@ -62,73 +63,14 @@ void TimerSet(unsigned long M) {
     _avr_timer_cntcurr = _avr_timer_M;
 }
 
-int Tick(int state) {
-    static unsigned char out;
-    
-    unsigned char A0 = ~PINA & 0x01;
-
-    switch (state) {
-        case Start:
-            state = init;
-            break;
-
-        case init :
-            state = nextLED;
-            break;
-
-        case nextLED :
-            state = A0 ? pause: nextLED;
-            break;
-
-        case pause:
-            state = A0 ? pause: wait;
-            break;
-
-        case wait:
-            state = A0 ? reset: wait;
-            break;
-        
-        case reset:
-            state = nextLED;
-            break;
-        
-        default: break;
-    }
-
-    switch (state) {
-        case Start: break;
-
-        case init :
-            out = 0x01;
-            PORTB = out;
-            break;
-        
-        case nextLED :
-            out = out << 1;
-            if (out == 0x08) { out = 0x01; }
-            PORTB = out;
-            break;
-
-        case pause: break;
-
-
-        case wait: break;
-    
-        case reset: break;
-
-        default: break;
-                
-    }
-
-    return state;
-}
+int Tick(int state);
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-    DDRA = 0x00; PORTA = 0xFF;    
+    DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    TimerSet(300);
+    TimerSet(1000);
     TimerOn();
 
     States state = Start;
@@ -142,18 +84,42 @@ int main(void) {
     return 1;
 }
 
+int Tick(int state) {
+    static unsigned char out;
 
+    switch (state) {
+        case Start:
+            state = init;
+            break;
 
+        case init :
+            state = nextLED;
+            break;
 
-    
+        case nextLED :
+            state = nextLED;
+            break;
 
+        default : break;
+    }
 
+    switch (state) {
+        case Start: break;
 
+        case init :
+            out = 0x01;
+            PORTB = out;
+            break;
 
+        case nextLED :
+            out = out << 1;
+            if (out == 0x08) { out = 0x01; }
+            PORTB = out;
+            break;
 
+        default : break;
 
+    }
 
-
-
-
-
+    return state;
+}

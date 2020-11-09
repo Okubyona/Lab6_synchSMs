@@ -63,6 +63,27 @@ void TimerSet(unsigned long M) {
     _avr_timer_cntcurr = _avr_timer_M;
 }
 
+int Tick(int state);
+
+int main(void) {
+    /* Insert DDR and PORT initializations */
+    DDRA = 0x00; PORTA = 0xFF;
+    DDRB = 0xFF; PORTB = 0x00;
+
+    TimerSet(300);
+    TimerOn();
+
+    States state = Start;
+
+    /* Insert your solution below */
+    while (1) {
+        state = Tick(state);
+        while (!TimerFlag);
+        TimerFlag = 0;
+    }
+    return 1;
+}
+
 int Tick(int state) {
     static unsigned char out;
     static unsigned char upDown;
@@ -136,23 +157,4 @@ int Tick(int state) {
     }
 
     return state;
-}
-
-int main(void) {
-    /* Insert DDR and PORT initializations */
-    DDRA = 0x00; PORTA = 0xFF;
-    DDRB = 0xFF; PORTB = 0x00;
-
-    TimerSet(300);
-    TimerOn();
-
-    States state = Start;
-
-    /* Insert your solution below */
-    while (1) {
-        state = Tick(state);
-        while (!TimerFlag);
-        TimerFlag = 0;
-    }
-    return 1;
 }
